@@ -10,6 +10,7 @@ require('dotenv').config({
   path: path.join(__dirname, envFile),
 });
 
+
 const { DB_PASSWORD, DB_NAME, DB_USER, DB_HOST, DB_PORT } = process.env;
 
 const connection = mysql.createConnection({
