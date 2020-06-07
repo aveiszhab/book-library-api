@@ -22,6 +22,10 @@ module.exports = (sequelize, DataTypes) => {
         notNull: {
           args: true,
           msg: 'Name is required.'
+        },
+        notEmpty: {
+          args: true,
+          msg: 'Name is required.'
         }
       }
     },
@@ -37,6 +41,10 @@ module.exports = (sequelize, DataTypes) => {
         notNull: {
           args: true,
           msg: 'Password is required.'
+        },
+        notEmpty: {
+          args: true,
+          msg: 'Name is required.'
         }
       }
     }

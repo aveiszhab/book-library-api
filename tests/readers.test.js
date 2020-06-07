@@ -44,6 +44,24 @@ describe('/readers', () => {
         expect(newReaderRecord).to.equal(null);
       });
 
+      it('returns a 400 if empty name is provided', async () => {
+        const response = await request(app)
+        .post('/readers')
+        .send({
+          name: '',
+          email: 'future_ms_darcy@gmail.com',
+          password: 'password1'
+        });
+      
+        expect(response.status).to.equal(400);
+        expect(response.body.error).to.equal('Validation error: Name is required.')
+        
+        const newReaderRecord = await Reader.findByPk(response.body.id, {
+          raw: true,
+        });
+        expect(newReaderRecord).to.equal(null);
+      });
+
       it('returns a 400 if no email is provided', async () => {
         const response = await request(app)
         .post('/readers')
@@ -210,6 +228,16 @@ describe('/readers', () => {
       
         expect(response.status).to.equal(400);
         expect(response.body.error).to.equal('notNull Violation: Name is required.');
+      });
+
+      it('returns a 400 if empty name is provided', async () => {
+        const reader = readers[0];
+        const response = await request(app)
+        .patch(`/readers/${reader.id}`)
+        .send({name: ''});
+      
+        expect(response.status).to.equal(400);
+        expect(response.body.error).to.equal('Validation error: Name is required.');
       });
 
       it('returns a 400 if no email is provided', async () => {
