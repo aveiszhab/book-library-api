@@ -25,6 +25,93 @@ describe('/readers', () => {
         expect(newReaderRecord.email).to.equal('future_ms_darcy@gmail.com');
         expect(newReaderRecord.password).to.equal('password1');
       });
+
+      it('returns a 400 if no name is provided', async () => {
+        const response = await request(app)
+        .post('/readers')
+        .send({
+          name: null,
+          email: 'future_ms_darcy@gmail.com',
+          password: 'password1'
+        });
+      
+        expect(response.status).to.equal(400);
+        expect(response.body.error).to.equal('notNull Violation: Name is required.')
+        
+        const newReaderRecord = await Reader.findByPk(response.body.id, {
+          raw: true,
+        });
+        expect(newReaderRecord).to.equal(null);
+      });
+
+      it('returns a 400 if no email is provided', async () => {
+        const response = await request(app)
+        .post('/readers')
+        .send({
+          name: 'Elizabeth Bennet',
+          email: null,
+          password: 'password1'
+        });
+        expect(response.status).to.equal(400);
+        expect(response.body.error).to.equal('notNull Violation: Email address is required.');
+
+        const newReaderRecord = await Reader.findByPk(response.body.id, {
+          raw: true,
+        });
+        expect(newReaderRecord).to.equal(null);
+      });
+
+      it('returns a 400 if invalid email is provided', async () => {
+        const response = await request(app)
+        .post('/readers')
+        .send({
+          name: 'Elizabeth Bennet',
+          email: 'future_ms_darcygmail.com',
+          password: 'password1'
+        });
+        expect(response.status).to.equal(400);
+        expect(response.body.error).to.equal('Validation error: Email address is invalid.');
+
+        const newReaderRecord = await Reader.findByPk(response.body.id, {
+          raw: true,
+        });
+        expect(newReaderRecord).to.equal(null);
+      });
+
+      it('returns a 400 if no password is provided', async () => {
+        const response = await request(app)
+        .post('/readers')
+        .send({
+          name: 'Elizabeth Bennet',
+          email: 'future_ms_darcy@gmail.com',
+          password: null
+        });
+        expect(response.status).to.equal(400);
+        expect(response.body.error).to.equal('notNull Violation: Password is required.');
+
+        const newReaderRecord = await Reader.findByPk(response.body.id, {
+          raw: true,
+        });
+        expect(newReaderRecord).to.equal(null);
+      });
+
+      it('returns a 400 if invalid password is provided', async () => {
+        const response = await request(app)
+        .post('/readers')
+        .send({
+          name: 'Elizabeth Bennet',
+          email: 'future_ms_darcy@gmail.com',
+          password: 'passwd'
+        });
+
+        expect(response.status).to.equal(400);
+        expect(response.body.error).to.equal('Validation error: Password should be at least 8 characters long.');
+        
+        const newReaderRecord = await Reader.findByPk(response.body.id, {
+          raw: true,
+        });
+        expect(newReaderRecord).to.equal(null);
+      });
     });
   });
 
@@ -97,6 +184,7 @@ describe('/readers', () => {
         const response = await request(app)
           .patch(`/readers/${reader.id}`)
           .send({ email: 'miss_e_bennet@gmail.com' });
+        
         const updatedReaderRecord = await Reader.findByPk(reader.id, {
           raw: true,
         });
@@ -112,6 +200,57 @@ describe('/readers', () => {
 
         expect(response.status).to.equal(404);
         expect(response.body.error).to.equal('The reader could not be found.');
+      });
+
+      it('returns a 400 if no name is provided', async () => {
+        const reader = readers[0];
+        const response = await request(app)
+        .patch(`/readers/${reader.id}`)
+        .send({name: null});
+      
+        expect(response.status).to.equal(400);
+        expect(response.body.error).to.equal('notNull Violation: Name is required.');
+      });
+
+      it('returns a 400 if no email is provided', async () => {
+        const reader = readers[0];
+        const response = await request(app)
+        .patch(`/readers/${reader.id}`)
+        .send({email: null});
+
+        expect(response.status).to.equal(400);
+        expect(response.body.error).to.equal('notNull Violation: Email address is required.');
+      });
+
+      it('returns a 400 if invalid email is provided', async () => {
+        const reader = readers[0];
+        const response = await request(app)
+        .patch(`/readers/${reader.id}`)
+        .send({email: 'future_ms_darcygmail.com'});
+
+        expect(response.status).to.equal(400);
+        expect(response.body.error).to.equal('Validation error: Email address is invalid.');
+      });
+
+      it('returns a 400 if no password is provided', async () => {
+        const reader = readers[0];
+        const response = await request(app)
+        .patch(`/readers/${reader.id}`)
+        .send({password: null});
+
+        expect(response.status).to.equal(400);
+        expect(response.body.error).to.equal('notNull Violation: Password is required.');
+      });
+
+      it('returns a 400 if invalid password is provided', async () => {
+        const reader = readers[0];
+        const response = await request(app)
+        .patch(`/readers/${reader.id}`)
+        .send({password: 'passwd'});
+
+        expect(response.status).to.equal(400);
+        expect(response.body.error).to.equal('Validation error: Password should be at least 8 characters long.');
+      
       });
     });
 

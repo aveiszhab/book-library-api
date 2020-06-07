@@ -8,10 +8,15 @@ const getReaders = (_, res) => {
 
 const createReader = (req, res) => {
   const newReader = req.body;
-
-  Reader
+  
+    Reader
     .create(newReader)
-    .then(newReaderCreated => res.status(201).json(newReaderCreated));
+    .then(newReaderCreated => res.status(201).json(newReaderCreated))
+    .catch((error) => {
+      const errorMessage = error.message
+      res.status(400).json({ error: errorMessage })
+    });
+
 }
 
 const updateReader = (req, res) => {
@@ -23,14 +28,16 @@ const updateReader = (req, res) => {
     .then(([recordsUpdated]) => {
       if (!recordsUpdated) {
         res.status(404).json({ error: 'The reader could not be found.' });
-    } else {
-      Reader.findByPk(id).then((updatedReader) => {
-        res
-        .status(200)
-        .json(updatedReader);
-    }
+      } else {
+        Reader.findByPk(id).then((updatedReader) => {
+          res.status(200).json(updatedReader);
+        }
       )}
-  });
+    })
+    .catch((error) => {
+      const errorMessage = error.message
+      res.status(400).json({ error: errorMessage })
+    });
 }
 
 const getReaderById = (req, res) => {
@@ -46,6 +53,10 @@ const getReaderById = (req, res) => {
         .status(200)
         .json(reader);
     }
+  })
+  .catch((error) => {
+    const errorMessage = error.message
+    res.status(400).json({ error: errorMessage })
   });
 }
 
@@ -64,6 +75,10 @@ const deleteReader = (req, res) => {
             res.status(204).send();
         });
     }
+  })
+  .catch((error) => {
+    const errorMessage = error.message
+    res.status(400).json({ error: errorMessage })
   });
 }
 
