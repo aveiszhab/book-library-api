@@ -2,6 +2,7 @@ const express = require('express');
 
 const router = express.Router();
 const readerController = require('../controllers/reader');
+const bookController = require('../controllers/book')
 
 router
   .route('/')
@@ -13,5 +14,10 @@ router
   .get(readerController.getReaderById)
   .patch(readerController.updateReader)
   .delete(readerController.deleteReader);
+
+router
+  .route('/:id/books')
+  .post(bookController.createBook)
+  .get(bookController.listBooksByReader);
 
 module.exports = router;
