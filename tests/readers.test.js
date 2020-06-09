@@ -4,131 +4,80 @@ const request = require('supertest');
 const { Reader } = require('../src/models');
 const app = require('../src/app');
 
+const {
+  testCreateItem,
+  testListAllItems,
+  testGetItemById,
+  testUpdateItem,
+  testDeleteItem
+} = require('./testHelpers');
+
 describe('/readers', () => {
   before(async () => Reader.sequelize.sync());
 
   describe('with no records in the database', () => {
     describe('POST /readers', () => {
       it('creates a new reader in the database', async () => {
-        const response = await request(app).post('/readers').send({
+        const newReader = {
           name: 'Elizabeth Bennet',
           email: 'future_ms_darcy@gmail.com',
           password: 'password1'
-        });
-        const newReaderRecord = await Reader.findByPk(response.body.id, {
-          raw: true,
-        });
-
-        expect(response.status).to.equal(201);
-        expect(response.body.name).to.equal('Elizabeth Bennet');
-        expect(newReaderRecord.name).to.equal('Elizabeth Bennet');
-        expect(newReaderRecord.email).to.equal('future_ms_darcy@gmail.com');
-        expect(newReaderRecord.password).to.equal('password1');
+        };
+        await testCreateItem('reader','/readers', newReader);
       });
 
       it('returns a 400 if no name is provided', async () => {
-        const response = await request(app)
-        .post('/readers')
-        .send({
+        const newReader = {
           name: null,
           email: 'future_ms_darcy@gmail.com',
           password: 'password1'
-        });
-      
-        expect(response.status).to.equal(400);
-        expect(response.body.error).to.equal('notNull Violation: Name is required.')
-        
-        const newReaderRecord = await Reader.findByPk(response.body.id, {
-          raw: true,
-        });
-        expect(newReaderRecord).to.equal(null);
+        };
+        await testCreateItem('reader','/readers', newReader);
       });
 
       it('returns a 400 if empty name is provided', async () => {
-        const response = await request(app)
-        .post('/readers')
-        .send({
+        const newReader = {
           name: '',
           email: 'future_ms_darcy@gmail.com',
           password: 'password1'
-        });
-      
-        expect(response.status).to.equal(400);
-        expect(response.body.error).to.equal('Validation error: Name is required.')
-        
-        const newReaderRecord = await Reader.findByPk(response.body.id, {
-          raw: true,
-        });
-        expect(newReaderRecord).to.equal(null);
+        };
+        await testCreateItem('reader','/readers', newReader);
       });
 
       it('returns a 400 if no email is provided', async () => {
-        const response = await request(app)
-        .post('/readers')
-        .send({
+        const newReader = {
           name: 'Elizabeth Bennet',
           email: null,
           password: 'password1'
-        });
-        expect(response.status).to.equal(400);
-        expect(response.body.error).to.equal('notNull Violation: Email address is required.');
-
-        const newReaderRecord = await Reader.findByPk(response.body.id, {
-          raw: true,
-        });
-        expect(newReaderRecord).to.equal(null);
+        };
+        await testCreateItem('reader','/readers', newReader);
       });
 
       it('returns a 400 if invalid email is provided', async () => {
-        const response = await request(app)
-        .post('/readers')
-        .send({
+        const newReader = {
           name: 'Elizabeth Bennet',
           email: 'future_ms_darcygmail.com',
           password: 'password1'
-        });
-        expect(response.status).to.equal(400);
-        expect(response.body.error).to.equal('Validation error: Email address is invalid.');
-
-        const newReaderRecord = await Reader.findByPk(response.body.id, {
-          raw: true,
-        });
-        expect(newReaderRecord).to.equal(null);
+        };
+        await testCreateItem('reader','/readers', newReader);
       });
 
       it('returns a 400 if no password is provided', async () => {
-        const response = await request(app)
-        .post('/readers')
-        .send({
+        const newReader = {
           name: 'Elizabeth Bennet',
           email: 'future_ms_darcy@gmail.com',
           password: null
-        });
-        expect(response.status).to.equal(400);
-        expect(response.body.error).to.equal('notNull Violation: Password is required.');
-
-        const newReaderRecord = await Reader.findByPk(response.body.id, {
-          raw: true,
-        });
-        expect(newReaderRecord).to.equal(null);
+        };
+        await testCreateItem('reader','/readers', newReader);
       });
 
       it('returns a 400 if invalid password is provided', async () => {
-        const response = await request(app)
-        .post('/readers')
-        .send({
+        const newReader = {
           name: 'Elizabeth Bennet',
           email: 'future_ms_darcy@gmail.com',
           password: 'passwd'
-        });
-
-        expect(response.status).to.equal(400);
-        expect(response.body.error).to.equal('Validation error: Password should be at least 8 characters long.');
-        
-        const newReaderRecord = await Reader.findByPk(response.body.id, {
-          raw: true,
-        });
-        expect(newReaderRecord).to.equal(null);
+        };
+        await testCreateItem('reader','/readers', newReader);
       });
     });
   });
@@ -160,142 +109,78 @@ describe('/readers', () => {
 
     describe('GET /readers', () => {
       it('gets all readers records', async () => {
-        const response = await request(app).get('/readers');
-
-        expect(response.status).to.equal(200);
-        expect(response.body.length).to.equal(3);
-
-        response.body.forEach((reader) => {
-          const expected = readers.find((a) => a.id === reader.id);
-         
-          expect(reader.name).to.equal(expected.name);
-          expect(reader.email).to.equal(expected.email);
-          expect(reader.password).to.equal(expected.password);
-
-        });
+        await testListAllItems('reader', '/readers');
       });
     });
 
-    describe('GET /readers/:id', () => {
+    describe('GET /readers/:readerId', () => {
       it('gets readers record by id', async () => {
         const reader = readers[0];
-        const response = await request(app).get(`/readers/${reader.id}`);
-
-        expect(response.status).to.equal(200);
-        expect(response.body.name).to.equal(reader.name);
-        expect(response.body.email).to.equal(reader.email);
-        expect(response.body.password).to.equal(reader.password);
-
+        await testGetItemById('reader', '/readers', reader.id);
       });
 
       it('returns a 404 if the reader does not exist', async () => {
-        const response = await request(app).get('/readers/12345');
-
-        expect(response.status).to.equal(404);
-        expect(response.body.error).to.equal('The reader could not be found.');
+        await testGetItemById('reader', '/readers', '44444444');
       });
     });
 
-    describe('PATCH /readers/:id', () => {
+    describe('PATCH /readers/:readerId', () => {
       it('updates readers email by id', async () => {
         const reader = readers[0];
-        const response = await request(app)
-          .patch(`/readers/${reader.id}`)
-          .send({ email: 'miss_e_bennet@gmail.com' });
-        
-        const updatedReaderRecord = await Reader.findByPk(reader.id, {
-          raw: true,
-        });
-
-        expect(response.status).to.equal(200);
-        expect(updatedReaderRecord.email).to.equal('miss_e_bennet@gmail.com');
+        const update = { email: 'miss_e_bennet@gmail.com' };
+        await testUpdateItem('reader', '/readers', reader.id, update);
       });
 
       it('returns a 404 if the reader does not exist', async () => {
-        const response = await request(app)
-          .patch('/readers/12345')
-          .send({ email: 'some_new_email@gmail.com' });
-
-        expect(response.status).to.equal(404);
-        expect(response.body.error).to.equal('The reader could not be found.');
+        const update = { email: 'miss_e_bennet@gmail.com' };     
+        await testUpdateItem('reader', '/readers', '44444444', update);
       });
 
       it('returns a 400 if no name is provided', async () => {
         const reader = readers[0];
-        const response = await request(app)
-        .patch(`/readers/${reader.id}`)
-        .send({name: null});
-      
-        expect(response.status).to.equal(400);
-        expect(response.body.error).to.equal('notNull Violation: Name is required.');
+        const update = { name: null };        
+        await testUpdateItem('reader', '/readers', reader.id, update);
       });
 
       it('returns a 400 if empty name is provided', async () => {
         const reader = readers[0];
-        const response = await request(app)
-        .patch(`/readers/${reader.id}`)
-        .send({name: ''});
-      
-        expect(response.status).to.equal(400);
-        expect(response.body.error).to.equal('Validation error: Name is required.');
+        const update = { name: "" };        
+        await testUpdateItem('reader', '/readers', reader.id, update);
       });
 
       it('returns a 400 if no email is provided', async () => {
         const reader = readers[0];
-        const response = await request(app)
-        .patch(`/readers/${reader.id}`)
-        .send({email: null});
-
-        expect(response.status).to.equal(400);
-        expect(response.body.error).to.equal('notNull Violation: Email address is required.');
+        const update = { email: null };        
+        await testUpdateItem('reader', '/readers', reader.id, update);
       });
 
       it('returns a 400 if invalid email is provided', async () => {
         const reader = readers[0];
-        const response = await request(app)
-        .patch(`/readers/${reader.id}`)
-        .send({email: 'future_ms_darcygmail.com'});
-
-        expect(response.status).to.equal(400);
-        expect(response.body.error).to.equal('Validation error: Email address is invalid.');
+        const update = { email: 'kafhakjshdf' };        
+        await testUpdateItem('reader', '/readers', reader.id, update);
       });
 
       it('returns a 400 if no password is provided', async () => {
         const reader = readers[0];
-        const response = await request(app)
-        .patch(`/readers/${reader.id}`)
-        .send({password: null});
-
-        expect(response.status).to.equal(400);
-        expect(response.body.error).to.equal('notNull Violation: Password is required.');
+        const update = { password: null };        
+        await testUpdateItem('reader', '/readers', reader.id, update);
       });
 
       it('returns a 400 if invalid password is provided', async () => {
         const reader = readers[0];
-        const response = await request(app)
-        .patch(`/readers/${reader.id}`)
-        .send({password: 'passwd'});
-
-        expect(response.status).to.equal(400);
-        expect(response.body.error).to.equal('Validation error: Password should be at least 8 characters long.');
-      
+        const update = { password: '\dfk' };        
+        await testUpdateItem('reader', '/readers', reader.id, update);
       });
     });
 
-    describe('DELETE /readers/:id', () => {
+    describe('DELETE /readers/:readerId', () => {
       it('deletes reader record by id', async () => {
         const reader = readers[0];
-        const response = await request(app).delete(`/readers/${reader.id}`);
-        const deletedReader = await Reader.findByPk(reader.id, { raw: true });
-
-        expect(response.status).to.equal(204);
-        expect(deletedReader).to.equal(null);
+        await testDeleteItem('reader', '/readers', reader.id);
       });
 
       it('returns a 404 if the reader does not exist', async () => {
-        const response = await request(app).delete('/readers/12345');
-        expect(response.status).to.equal(404);
-        expect(response.body.error).to.equal('The reader could not be found.');
+        await testDeleteItem('reader', '/readers', '44444444444');
       });
     });
   });

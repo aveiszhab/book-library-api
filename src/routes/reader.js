@@ -10,14 +10,10 @@ router
   .post(readerController.createReader);
 
 router
-  .route('/:id')
+  .route('/:readerId')
   .get(readerController.getReaderById)
   .patch(readerController.updateReader)
   .delete(readerController.deleteReader);
 
-router
-  .route('/:id/books')
-  .post(bookController.createBook)
-  .get(bookController.listBooksByReader);
 
 module.exports = router;

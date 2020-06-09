@@ -5,6 +5,7 @@ const bookController = require('../controllers/book');
 
 router
   .route('/')
+  .post(bookController.createBook)
   .get(bookController.listAllBooks);
 
 router

@@ -10,6 +10,9 @@ const setupDatabase = () => {
     port: DB_PORT,
     dialect: 'mysql',
     logging: false,
+    define: {
+      timestamps: false
+    },
   });
 
   const Reader = ReaderModel(sequelize, Sequelize);
