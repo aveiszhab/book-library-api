@@ -10,12 +10,25 @@ const getModel = (model) => {
     return models[model];
 };
 
+const removePassword = (obj) => {
+  if (obj.hasOwnProperty('password')) {
+    delete obj.password;
+  }
+
+  return obj;
+};
+
 
 const listAllItems = (res, model) => {
   const Model = getModel(model);
 
-    Model.findAll()
-    .then(allItems => res.status(200).json(allItems))
+    Model.findAll({raw: true})
+    .then((items)=> {
+      const itemWithoutPwd = items.map((item) =>
+        removePassword(item)
+      );
+      res.status(200).json(itemWithoutPwd);
+    })      
     .catch((error) => res.status(400).json({ error: error.message }));
   };
 
@@ -38,11 +51,16 @@ const updateItem = (res, model, id, item) => {
   
   Model
     .update(item, { where: { id } })
-    .then(([updatedItem]) => {
-      if (!updatedItem) 
+    .then(([update]) => {
+      if (!update) 
         res.status(404).json(get404Error(model));
-      else
-        res.status(200).json(updatedItem);
+      else {
+        Model.findByPk(id, {raw: true})
+        .then((updatedItem) => {
+          const itemWithoutPwd = removePassword(updatedItem)
+          res.status(200).json(itemWithoutPwd);
+        })
+      };
     })
     .catch((error) => res.status(400).json({ error: error.message }));
 };
@@ -50,12 +68,14 @@ const updateItem = (res, model, id, item) => {
 const getItemById = (res, model, id) => {
   const Model = getModel(model);
 
-  Model.findByPk(id)
+  Model.findByPk(id, {raw: true})
   .then(item => {
     if (!item) 
      res.status(404).json(get404Error(model));
-    else
-      res.status(200).json(item);
+    else {
+      const itemWithoutPwd = removePassword(item)
+      res.status(200).json(itemWithoutPwd);
+    };
   })
   .catch((error) => res.status(400).json({ error: error.message }));
 }
@@ -65,7 +85,10 @@ const createItem = (res, model, item) => {
   
     Model
     .create(item)
-    .then(itemCreated => res.status(201).json(itemCreated))
+    .then(itemCreated => {
+      const itemWithoutPwd = removePassword(itemCreated.dataValues)
+      res.status(201).json(itemWithoutPwd);
+    })
     .catch((error) => res.status(400).json({ error: error.message }));
 };
 

@@ -19,11 +19,11 @@ const testCreateItem  = async(model, path, item) => {
         if(!newItemRecord) {
           expect(response.status).to.equal(400);
           expect(newItemRecord).to.equal(null);
-
         } else {
           expect(response.status).to.equal(201);            
-          expect(response.body).to.eql(newItemRecord);
-          expect(response.body).to.include(item);
+          expect(newItemRecord).to.include(response.body);
+          expect(newItemRecord).to.include(item);
+          expect(response.body).not.to.has.property('password');
         }
 };
 
@@ -32,10 +32,18 @@ const testListAllItems = async(model, path) => {
     
     const response = await request(app)
        .get(path);
-    const listAllItem = await Model.findAll({raw: true})
+    const listAllItems = await Model.findAll({raw: true})
     expect(response.status).to.equal(200);
-    expect(response.body.length).to.equal(listAllItem.length);   
-    expect(response.body).to.eql(listAllItem);
+    expect(response.body.length).to.equal(listAllItems.length);   
+
+    listAllItems.forEach((obj) => {
+        const expected = response.body.find((a) => a.id === obj.id);
+        if (obj.hasOwnProperty('password')) {
+            expect(obj).to.contain(expected);
+        } else {
+            expect(obj).to.eql(expected);
+        }
+    });
 };
 
 const testGetItemById = async(model, path, id) => {
@@ -50,7 +58,8 @@ const testGetItemById = async(model, path, id) => {
     } else {
     expect(response.status).to.equal(200);
     expect(response.body.id).to.equal(itemById.id);   
-    expect(response.body).to.eql(itemById);
+    expect(itemById).to.contain(response.body);
+    expect(response.body).not.to.has.property('password')
     };
 };
 
@@ -66,12 +75,14 @@ const testUpdateItem = async(model, path, id, item) => {
     if(!updatedItem) {
         expect(response.status).to.equal(404);
         expect(response.body).to.eql(get404Error(model));
-    }else if (response.body.error) {
+    } else if (response.body.error) {
         expect(response.status).to.equal(400);
         expect(updatedItem).not.to.include(item);
     } else {
         expect(response.status).to.equal(200);
         expect(updatedItem).to.include(item);
+        expect(updatedItem).to.include(response.body);
+        expect(response.body).not.to.has.property('password');
     };
 };
 
