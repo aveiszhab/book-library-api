@@ -13,7 +13,13 @@ const {
 } = require('./testHelpers');
 
 describe('/readers', () => {
-  before(async () => Reader.sequelize.sync());
+  before(async () => {
+    try {
+      await Reader.sequelize.sync();
+    } catch (err) {
+        console.log(err);
+    }
+  });
 
   describe('with no records in the database', () => {
     describe('POST /readers', () => {

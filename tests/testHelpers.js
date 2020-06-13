@@ -16,6 +16,7 @@ const testCreateItem  = async(model, path, item) => {
         .send(item);
         
     const newItemRecord = await Model.findByPk(response.body.id, {raw: true});
+        //console.log(response.body);
         if(!newItemRecord) {
           expect(response.status).to.equal(400);
           expect(newItemRecord).to.equal(null);

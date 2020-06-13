@@ -1,4 +1,4 @@
-const { Reader, Book } =require('../models');
+const { Reader, Book } = require('../models');
 const {
   listAllItems,
   deleteItem,

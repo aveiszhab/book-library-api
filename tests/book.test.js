@@ -197,10 +197,8 @@ describe('/books', () => {
             await testDeleteItem('book', '/books', book.id);
         }); 
 
-        it('deletes book by Id', async () => {
+        it('returns a 404 if the book does not exist', async () => {
           await testDeleteItem('book', '/books', '444444444');});
     });
-
-
   });
 });
