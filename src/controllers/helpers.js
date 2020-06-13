@@ -12,6 +12,16 @@ const getModel = (model) => {
     return models[model];
 };
 
+const getOptions = (model) => {
+  if (model === 'book') return { include: [{model: Author}, {model: Genre}], raw: true, nest: true };
+
+  if (model === 'reader') return { include: Book, raw: true, nest: true };
+  if (model === 'author') return { include: Book, raw: true, nest: true };
+  if (model === 'genre') return { include: Book, raw: true, nest: true };
+
+  return {};
+};
+
 const removePassword = (obj) => {
   if (obj.hasOwnProperty('password')) {
     delete obj.password;
@@ -23,8 +33,9 @@ const removePassword = (obj) => {
 
 const listAllItems = (res, model) => {
   const Model = getModel(model);
+  const options = getOptions(model);
 
-    Model.findAll({raw: true})
+    Model.findAll({...options})
     .then((items)=> {
       const itemWithoutPwd = items.map((item) =>
         removePassword(item)
@@ -69,8 +80,9 @@ const updateItem = (res, model, id, item) => {
 
 const getItemById = (res, model, id) => {
   const Model = getModel(model);
+  const options = getOptions(model);
 
-  Model.findByPk(id, {raw: true})
+  Model.findByPk(id, {...options})
   .then(item => {
     if (!item) 
      res.status(404).json(get404Error(model));
@@ -89,7 +101,7 @@ const createItem = (res, model, item) => {
     .create(item)
     .then(itemCreated => {
       const itemWithoutPwd = removePassword(itemCreated.dataValues)
-      res.status(201).json(itemWithoutPwd);
+      res.status(201).json(itemWithoutPwd)
     })
     .catch((error) => res.status(400).json({ error: error.message }));
 };
@@ -102,5 +114,6 @@ const createItem = (res, model, item) => {
       getItemById,
       createItem,
       get404Error,
-      getModel
+      getModel,
+      getOptions
   }

@@ -43,6 +43,18 @@ describe('/genres', () => {
         };
         await testCreateItem('genre','/genres', newGenre);
       });
+
+      it('returns a 400 if genre is not unique', async () => {
+        const newGenre1 = {
+          author: 'J.G. Ballard'
+        };
+        const newGenre2 = {
+        author: 'J.G. Ballard'
+        };
+
+        await testCreateItem('genre','/genres', newGenre1);
+        await testCreateItem('genre','/genres', newGenre2);
+      });
     });
   });
 
@@ -54,13 +66,13 @@ describe('/genres', () => {
       
       genres = await Promise.all([
         Genre.create({
-            genre: 'J.G. Ballard',
+            genre: 'Science Fiction',
         }),
         Genre.create({
-            genre: 'Frank Herbert',
+            genre: 'Fantasy',
         }),
         Genre.create({
-            genre: 'Ursula K. Le Guin',
+            genre: 'Crime',
         }),
       ]);
     });

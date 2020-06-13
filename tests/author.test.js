@@ -30,6 +30,18 @@ describe('/authors', () => {
         await testCreateItem('author','/authors', newAuthor);
       }); 
 
+      it('returns a 400 if author is not unique', async () => {
+        const newAuthor1 = {
+          author: 'J.G. Ballard'
+        };
+        const newAuthor2 = {
+        author: 'J.G. Ballard'
+        };
+
+        await testCreateItem('author','/authors', newAuthor1);
+        await testCreateItem('author','/authors', newAuthor2);
+      });
+
       it('returns a 400 if no author is provided', async () => {
         const newAuthor = {
             author: null

@@ -3,7 +3,10 @@ module.exports = (sequelize, DataTypes) => {
         author: {
             type: DataTypes.STRING,
             allowNull: false,
-            //unique: true,
+            unique:{ 
+              args: true,
+              msg: 'Author already exists'
+            },
             validate: {
               notNull: {
                 args: true,

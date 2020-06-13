@@ -1,6 +1,6 @@
 const { expect } = require('chai');
 const request = require('supertest');
-const {Reader, Book} =require('../src/models/index');
+const {Book, Author, Genre, Reader} =require('../src/models/index');
 const app = require('../src/app');
 
 const {
@@ -13,28 +13,37 @@ const {
 
 describe('/books', () => {
   let reader;
-  
+  let author;
+  let genre;
+
   before(async () => {
     try {
-      await Reader.sequelize.sync();
       await Book.sequelize.sync();
+      await Author.sequelize.sync();
+      await Genre.sequelize.sync();
+      await Reader.sequelize.sync();
     } catch (err) {
         console.log(err);
     }
   });
 
-  beforeEach(async () => {
-      try{
-        await Reader.destroy({where: {} });
-        await Book.destroy({ where: {} });  
-        reader = await Reader.create({
-          name: 'Elizabeth Bennet',
-          email: 'future_ms_darcy@gmail.com',
-          password: 'password1'
-        });
-      } catch (err) {
-        console.log(err);
-      } 
+  beforeEach(async ()=> {
+    await Book.destroy({ where: {} });
+    await Author.destroy({ where: {} });
+    await Reader.destroy({ where: {} });
+    await Genre.destroy({ where: {} });
+
+    reader = await Reader.create({
+      name: 'Elizabeth Bennet',
+      email: 'future_ms_darcy@gmail.com',
+      password: 'Password1'
+    }) 
+    author = await Author.create({
+      author: 'J.G. Ballard'
+    })
+    genre = await Genre.create({
+      genre: 'Fiction'
+    })
   });
 
   describe('with no records in the database', () => {
@@ -42,10 +51,10 @@ describe('/books', () => {
       it('creates a new book in the database', async () => {
         const newBook = {
             title: 'book1',
-            author: 'Author1',
-            genre: 'fiction',
             ISBN: '978-3-16-148410-0',
-            readerId: reader.id
+            ReaderId: reader.id,
+            AuthorId: author.id,
+            GenreId: genre.id
         };
         await testCreateItem('book','/books', newBook);
       }); 
@@ -53,10 +62,10 @@ describe('/books', () => {
       it('returns a 400 if no title is provided', async () => {
         const newBook = {
             title: null,
-            author: 'Author1',
-            genre: 'fiction',
             ISBN: '978-3-16-148410-0',
-            readerId: reader.id
+            ReaderId: reader.id,
+            AuthorId: author.id,
+            GenreId: genre.id
         };
         await testCreateItem('book','/books', newBook);
       });
@@ -64,10 +73,10 @@ describe('/books', () => {
       it('returns a 400 if empty title is provided', async () => {
         const newBook = {
             title: '',
-            author: 'Author1',
-            genre: 'fiction',
             ISBN: '978-3-16-148410-0',
-            readerId: reader.id
+            ReaderId: reader.id,
+            AuthorId: author.id,
+            GenreId: genre.id
         };
         await testCreateItem('book','/books', newBook);
       });
@@ -75,21 +84,21 @@ describe('/books', () => {
       it('returns a 400 if no author is provided', async () => {
         const newBook = {
             title: 'book1',
-            author: null,
-            genre: 'fiction',
             ISBN: '978-3-16-148410-0',
-            readerId: reader.id
+            ReaderId: reader.id,
+            AuthorId: null,
+            GenreId: genre.id
         };
         await testCreateItem('book','/books', newBook);
       });
 
-      it('returns a 400 if empty title is provided', async () => {
+      it('returns a 400 if incorrect author is provided', async () => {
         const newBook = {
             title: 'book1',
-            author: '',
-            genre: 'fiction',
             ISBN: '978-3-16-148410-0',
-            readerId: reader.id
+            ReaderId: reader.id,
+            AuthorId: '',
+            GenreId: genre.id
         };
         await testCreateItem('book','/books', newBook);
       });
@@ -105,29 +114,32 @@ describe('/books', () => {
       books = await Promise.all([
         Book.create({
             title: 'book1',
-            author: 'Author1',
-            genre: 'fiction',
-            ISBN: '978-3-16-148410-0'
+            ISBN: '978-3-16-148410-0',
+            ReaderId: reader.id,
+            AuthorId: author.id,
+            GenreId: genre.id
         }),
         Book.create({
             title: 'book2',
-            author: 'Author2',
-            genre: 'crime',
             ISBN: '978-3-16-148410-2',
-            readerId: reader.id
+            ReaderId: reader.id,
+            AuthorId: author.id,
+            GenreId: genre.id
         }),
         Book.create({
             title: 'book3',
-            author: 'Author2',
-            genre: 'science',
-            ISBN: '978-3-16-148410-3'
+            ISBN: '978-3-16-148410-3',
+            ReaderId: reader.id,
+            AuthorId: author.id,
+            GenreId: genre.id
         }),
       ]);
     });
 
     describe('GET/books', () => {
       it('gets all book records', async () => {
-         await testListAllItems('book', '/books')      });
+         await testListAllItems('book', '/books')      
+      });
     });
 
     describe('GET /books/:bookId', () => {
@@ -149,13 +161,13 @@ describe('/books', () => {
 
         it('updates book genre by id', async () => {
           const book = books[0];
-          const update = {genre: 'updated'};
+          const update = {GenreId: 2};
           await testUpdateItem('book', '/books', book.id, update);
         });
 
         it('updates book author by id', async () => {
           const book = books[0];
-          const update = {author: 'updated'};
+          const update = {AuthorId: 2};
           await testUpdateItem('book', '/books', book.id, update);
         });
                 
@@ -178,13 +190,13 @@ describe('/books', () => {
 
         it('returns a 400 if no author is provided', async () => {
           const book = books[0];
-          const update = {author: null};
+          const update = {AuthorId: null};
           await testUpdateItem('book', '/books', book.id, update);
         });
   
-        it('returns a 400 if empty author is provided', async () => {
+        it('returns a 400 if incorrect author is provided', async () => {
           const book = books[0];
-          const update = {author: ''};
+          const update = {AuthorId: ''};
           await testUpdateItem('book', '/books', book.id, update);
         });
   
@@ -198,7 +210,8 @@ describe('/books', () => {
         }); 
 
         it('returns a 404 if the book does not exist', async () => {
-          await testDeleteItem('book', '/books', '444444444');});
+          await testDeleteItem('book', '/books', '444444444');
+        });
     });
   });
 });
