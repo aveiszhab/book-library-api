@@ -23,11 +23,11 @@ const setupDatabase = () => {
   const Genre = GenreModel(sequelize, Sequelize);
 
   Book.belongsTo(Reader, { foreignKey: { allowNull: false }, onDelete: 'CASCADE' });
-  Reader.hasMany(Book/*, { foreignKey: { allowNull: false }, onDelete: 'CASCADE' }*/);
+  Reader.hasMany(Book);
   Book.belongsTo(Author, { foreignKey: { allowNull: false }, onDelete: 'CASCADE' });
-  Author.hasMany(Book/*, { foreignKey: { allowNull: false }, onDelete: 'CASCADE' }*/);
+  Author.hasMany(Book);
   Book.belongsTo(Genre, { foreignKey: { allowNull: false }, onDelete: 'CASCADE' });
-  Genre.hasMany(Book/*, { foreignKey: { allowNull: false }, onDelete: 'CASCADE' }*/);
+  Genre.hasMany(Book);
 
 
   sequelize.sync({ alter: true });

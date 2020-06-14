@@ -6,6 +6,7 @@ const {
     getModel, 
     getOptions
 } = require('../src/controllers/helpers');
+const e = require('express');
 
 
 
@@ -40,11 +41,16 @@ const testListAllItems = async(model, path) => {
     expect(response.body.length).to.equal(listAllItems.length);   
 
     listAllItems.forEach((obj) => {
-        const expected = response.body.find((a) => a.id === obj.id);
-        if (obj.hasOwnProperty('password')) {
-            expect(obj).to.deep.includes(expected);
+        const expected = response.body.find((a) => a.id === obj.dataValues.id);
+           
+        if (obj.dataValues.hasOwnProperty('password')) {
+            expect(obj.dataValues.id).to.equal(expected.id);
+            expect(expected).not.to.has.property('password');
+            expect(obj.dataValues).to.include.keys(expected)
         } else {
-            expect(obj).to.eql(expected);
+            expect(obj.dataValues.id).to.equal(expected.id);
+            expect(expected).not.to.has.property('password');
+            expect(expected).to.have.all.keys(obj.dataValues)
         }
     });
 };
@@ -61,9 +67,9 @@ const testGetItemById = async(model, path, id) => {
         expect(response.body).to.eql(get404Error(model));
     } else {
     expect(response.status).to.equal(200);
-    expect(response.body.id).to.equal(itemById.id);   
-    expect(itemById).to.deep.includes(response.body);
+    expect(response.body.id).to.equal(itemById.dataValues.id);   
     expect(response.body).not.to.has.property('password')
+    expect(itemById.dataValues).to.include.keys(response.body)
     };
 };
 

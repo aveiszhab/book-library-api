@@ -13,11 +13,11 @@ const getModel = (model) => {
 };
 
 const getOptions = (model) => {
-  if (model === 'book') return { include: [{model: Author}, {model: Genre}], raw: true, nest: true };
+  if (model === 'book') return { include: [{model: Author}, {model: Genre}] };
 
-  if (model === 'reader') return { include: Book, raw: true, nest: true };
-  if (model === 'author') return { include: Book, raw: true, nest: true };
-  if (model === 'genre') return { include: Book, raw: true, nest: true };
+  if (model === 'reader') return { include: [Book] };
+  if (model === 'author') return { include: [Book] };
+  if (model === 'genre') return { include: [Book] };
 
   return {};
 };
@@ -38,7 +38,7 @@ const listAllItems = (res, model) => {
     Model.findAll({...options})
     .then((items)=> {
       const itemWithoutPwd = items.map((item) =>
-        removePassword(item)
+        removePassword(item.dataValues)
       );
       res.status(200).json(itemWithoutPwd);
     })      
@@ -87,7 +87,7 @@ const getItemById = (res, model, id) => {
     if (!item) 
      res.status(404).json(get404Error(model));
     else {
-      const itemWithoutPwd = removePassword(item)
+      const itemWithoutPwd = removePassword(item.dataValues)
       res.status(200).json(itemWithoutPwd);
     };
   })
