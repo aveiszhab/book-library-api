@@ -1,3 +1,5 @@
+This is a course project part of the Manchester Codes curriculum. The project was built on Manchester Codes repository.
+
 # MySQL Book Library API
 
 This is an Node.js/Express RESTful API that allows user to create accounts and list books based on User's stories.
